@@ -42,7 +42,7 @@ auto STS::isFree() -> bool { return (numSpikes == 0); }
 
 void STS::advance(uint now) {
     // AFR: should throttle
-    while (incomingReqs.empty() == false) {
+    while (!incomingReqs.empty()) {
         // get the request
         SST::Interfaces::SimpleMem::Request *req = incomingReqs.front();
 

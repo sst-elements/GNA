@@ -268,11 +268,7 @@ auto GNA::deliverBWPs() -> bool {
         tries--;
     }
 
-    if (BWPs.find(now) == BWPs.end()) {
-        return true;
-    } else {
-        return false;
-    }
+    return BWPs.find(now) == BWPs.end();
 }
 
 // find a free STS unit to assign the spike to
@@ -360,7 +356,7 @@ auto GNA::clockTic(Cycle_t) -> bool {
             if ((now & 0x3f) == 0) {
                 printf("%lu neurons fired @ %d\n", firedNeurons.size(), now);
             }
-            if (firedNeurons.size() == 0 && now > 100) {
+            if (firedNeurons.empty() && now > 100) {
                 primaryComponentOKToEndSim();
             }
             break;
