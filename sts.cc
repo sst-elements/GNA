@@ -13,8 +13,10 @@
 // information, see the LICENSE file in the top level directory of the
 // distribution.
 
-#include <sst/core/sst_config.h>
+#include <sst/core/sst_config.h>  // order of this header is relevant
+
 #include "sts.h"
+
 #include "GNA.h"
 
 using namespace SST;
@@ -30,16 +32,13 @@ void STS::assign(int neuronNum) {
         // AFR: should throttle
         using namespace Interfaces;
         using namespace White_Matter_Types;
-        SimpleMem::Request *req =
-            new SimpleMem::Request(SimpleMem::Request::Read, listAddr, sizeof(T_Wme));
+        auto *req = new SimpleMem::Request(SimpleMem::Request::Read, listAddr, sizeof(T_Wme));
         myGNA->readMem(req, this);
         listAddr += sizeof(T_Wme);
     }
 }
 
-bool STS::isFree() {
-    return (numSpikes == 0);
-}
+auto STS::isFree() -> bool { return (numSpikes == 0); }
 
 void STS::advance(uint now) {
     // AFR: should throttle
@@ -54,7 +53,7 @@ void STS::advance(uint now) {
         uint16_t strength = (req->data[0] << 8) + req->data[1];
         uint16_t tempOffset = (data[2] << 8) + data[3];
         uint16_t target = (data[4] << 8) + data[5];
-        //printf("  gna deliver str%u to %u @ %u\n", strength, target, tempOffset+now);
+        // printf("  gna deliver str%u to %u @ %u\n", strength, target, tempOffset+now);
         myGNA->deliver(strength, target, tempOffset + now);
         numSpikes--;
 
@@ -62,4 +61,3 @@ void STS::advance(uint now) {
         delete req;
     }
 }
-

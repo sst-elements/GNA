@@ -20,43 +20,41 @@
 #define __STDC_FORMAT_MACROS
 #endif
 
-#include <inttypes.h>
-#include <vector>
-
-#include <queue>
-
 #include <sst/core/interfaces/simpleMem.h>
 
+#include <cinttypes>
+#include <queue>
+#include <vector>
+
 namespace SST {
-    namespace GNAComponent {
+namespace GNAComponent {
 
-//foward decl
-        class GNA;
+// foward decl
+class GNA;
 
-        class Request;
+class Request;
 
 //  A Spike Transfer Structure engine - transforms a given spike by
 //  performing a look up and delivering spikes
-        class STS {
-            GNA *myGNA;
-            int stsID;
-            int numSpikes; // number of spikes yet to deliver
-            std::queue<SST::Interfaces::SimpleMem::Request *> incomingReqs;
-        public:
-            STS(GNA *parent, int n) : myGNA(parent), stsID(n), numSpikes(0) { ; }
+class STS {
+    GNA *myGNA;
+    int stsID;
+    int numSpikes;  // number of spikes yet to deliver
+    std::queue<SST::Interfaces::SimpleMem::Request *> incomingReqs;
 
-            bool isFree();
+   public:
+    STS(GNA *parent, int n) : myGNA(parent), stsID(n), numSpikes(0) { ; }
 
-            void assign(int);
+    auto isFree() -> bool;
 
-            void advance(uint);
+    void assign(int);
 
-            void returnRequest(SST::Interfaces::SimpleMem::Request *req) {
-                incomingReqs.push(req);
-            }
-        };
+    void advance(uint);
 
-    }
-}
+    void returnRequest(SST::Interfaces::SimpleMem::Request *req) { incomingReqs.push(req); }
+};
 
-#endif // _STS_H
+}  // namespace GNAComponent
+}  // namespace SST
+
+#endif  // _STS_H
