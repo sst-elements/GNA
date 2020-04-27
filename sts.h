@@ -1,8 +1,8 @@
-// Copyright 2018 NTESS. Under the terms
+// Copyright 2018-2020 NTESS. Under the terms
 // of Contract DE-NA0003525 with NTESS, the U.S.
 // Government retains certain rights in this software.
 //
-// Copyright (c) 2018, NTESS
+// Copyright (c) 2018-2020, NTESS
 // All rights reserved.
 //
 // Portions are copyright of other developers:
@@ -19,19 +19,18 @@
 #ifndef __STDC_FORMAT_MACROS
 #define __STDC_FORMAT_MACROS
 #endif
+#include <inttypes.h>
+#include <vector>
+
+#include <queue>
 
 #include <sst/core/interfaces/simpleMem.h>
-
-#include <cinttypes>
-#include <queue>
-#include <vector>
 
 namespace SST {
 namespace GNAComponent {
 
-// foward decl
+//foward decl
 class GNA;
-
 class Request;
 
 //  A Spike Transfer Structure engine - transforms a given spike by
@@ -39,22 +38,19 @@ class Request;
 class STS {
     GNA *myGNA;
     int stsID;
-    int numSpikes;  // number of spikes yet to deliver
+    int numSpikes; // number of spikes yet to deliver
     std::queue<SST::Interfaces::SimpleMem::Request *> incomingReqs;
-
-   public:
-    STS(GNA *parent, int n) : myGNA(parent), stsID(n), numSpikes(0) { ; }
-
-    auto isFree() -> bool;
-
+public:
+    STS(GNA *parent, int n) : myGNA(parent), stsID(n), numSpikes(0) {;}
+    bool isFree();
     void assign(int);
-
     void advance(uint);
-
-    void returnRequest(SST::Interfaces::SimpleMem::Request *req) { incomingReqs.push(req); }
+    void returnRequest(SST::Interfaces::SimpleMem::Request *req) {
+        incomingReqs.push(req);
+    }
 };
 
-}  // namespace GNAComponent
-}  // namespace SST
+}
+}
 
-#endif  // _STS_H
+#endif // _STS_H

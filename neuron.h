@@ -1,8 +1,8 @@
-// Copyright 2018 NTESS. Under the terms
+// Copyright 2018-2020 NTESS. Under the terms
 // of Contract DE-NA0003525 with NTESS, the U.S.
 // Government retains certain rights in this software.
 //
-// Copyright (c) 2018, NTESS
+// Copyright (c) 2018-2020, NTESS
 // All rights reserved.
 //
 // Portions are copyright of other developers:
@@ -17,7 +17,6 @@
 #define _NEURON_H
 
 #include <map>
-
 #include "gna_lib.h"
 
 namespace SST {
@@ -26,16 +25,16 @@ namespace GNAComponent {
 using namespace std;
 
 class neuron {
-   public:
-    void configure(const Neuron_Loader_Types::T_NctFl &in) { config = in; }
-
+public:
+    void configure(const Neuron_Loader_Types::T_NctFl &in) {
+        config = in;
+    }
     void deliverSpike(float str, uint when) {
         temporalBuffer[when] += str;
-        // printf(" got %f @ %d\n", str, when);
+        //printf(" got %f @ %d\n", str, when);
     }
-
     // performs Leaky Integrate and Fire. Returns true if fired.
-    auto lif(const uint now) -> bool {
+    bool lif(const uint now) {
         // Leak
         value -= config.NrnLkg;
 
@@ -56,33 +55,29 @@ class neuron {
             return false;
         }
     }
-
     void setWML(uint64_t addr, uint32_t entries) {
         WMLAddr = addr;
         WMLLen = entries;
     }
-
-    auto getWMLLen() const -> uint32_t { return WMLLen; }
-
-    auto getWMLAddr() const -> uint32_t { return WMLAddr; }
-
-   private:
-    Neuron_Loader_Types::T_NctFl config{};
-    float value{};
+    uint32_t getWMLLen() const {return WMLLen;}
+    uint32_t getWMLAddr() const {return WMLAddr;}
+private:
+    Neuron_Loader_Types::T_NctFl config;
+    float value;
     // temporal buffer
     typedef map<const uint, float> tBuf_t;
     tBuf_t temporalBuffer;
     // Neuron's white matter list
-    uint64_t WMLAddr{};  // start
-    uint32_t WMLLen{};   // number of entries in WML
+    uint64_t WMLAddr; // start
+    uint32_t WMLLen; // number of entries in WML
 
     // get any current spike values
-    auto getCurrentSpikes(const int now) -> float {
-        auto i = temporalBuffer.find(now);
+    float getCurrentSpikes(const int now) {
+        tBuf_t::iterator i = temporalBuffer.find(now);
         if (i != temporalBuffer.end()) {
             float val = i->second;
             temporalBuffer.erase(i);
-            // printf(" got current spike %f @ %d\n", val, now);
+            //printf(" got current spike %f @ %d\n", val, now);
             return val;
         } else {
             return 0;
@@ -90,7 +85,7 @@ class neuron {
     }
 };
 
-}  // namespace GNAComponent
-}  // namespace SST
+}
+}
 
-#endif  // _NEURON_H
+#endif // _NEURON_H

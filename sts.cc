@@ -1,8 +1,8 @@
-// Copyright 2018 NTESS. Under the terms
+// Copyright 2018-2020 NTESS. Under the terms
 // of Contract DE-NA0003525 with NTESS, the U.S.
 // Government retains certain rights in this software.
 //
-// Copyright (c) 2018, NTESS
+// Copyright (c) 2018-2020, NTESS
 // All rights reserved.
 //
 // Portions are copyright of other developers:
@@ -13,10 +13,8 @@
 // information, see the LICENSE file in the top level directory of the
 // distribution.
 
-#include <sst/core/sst_config.h>  // order of this header is relevant
-
+#include <sst/core/sst_config.h>
 #include "sts.h"
-
 #include "GNA.h"
 
 using namespace SST;
@@ -32,17 +30,20 @@ void STS::assign(int neuronNum) {
         // AFR: should throttle
         using namespace Interfaces;
         using namespace White_Matter_Types;
-        auto *req = new SimpleMem::Request(SimpleMem::Request::Read, listAddr, sizeof(T_Wme));
+        SimpleMem::Request *req =
+            new SimpleMem::Request(SimpleMem::Request::Read, listAddr, sizeof(T_Wme));
         myGNA->readMem(req, this);
         listAddr += sizeof(T_Wme);
     }
 }
 
-auto STS::isFree() -> bool { return (numSpikes == 0); }
+bool STS::isFree() {
+    return (numSpikes == 0);
+}
 
 void STS::advance(uint now) {
     // AFR: should throttle
-    while (!incomingReqs.empty()) {
+    while (incomingReqs.empty() == false) {
         // get the request
         SST::Interfaces::SimpleMem::Request *req = incomingReqs.front();
 
@@ -50,14 +51,15 @@ void STS::advance(uint now) {
 
         // deliver the spike
         auto &data = req->data;
-        uint16_t strength = (req->data[0] << 8) + req->data[1];
-        uint16_t tempOffset = (data[2] << 8) + data[3];
-        uint16_t target = (data[4] << 8) + data[5];
-        // printf("  gna deliver str%u to %u @ %u\n", strength, target, tempOffset+now);
-        myGNA->deliver(strength, target, tempOffset + now);
+        uint16_t strength = (req->data[0]<<8) + req->data[1];
+        uint16_t tempOffset = (data[2]<<8) + data[3];
+        uint16_t target = (data[4]<<8) + data[5];
+        //printf("  gna deliver str%u to %u @ %u\n", strength, target, tempOffset+now);
+        myGNA->deliver(strength, target, tempOffset+now);
         numSpikes--;
 
         incomingReqs.pop();
         delete req;
     }
 }
+
