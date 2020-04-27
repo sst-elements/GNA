@@ -29,28 +29,29 @@
 namespace SST {
 namespace GNAComponent {
 
-//foward decl
+// foward decl
 class GNA;
 class Request;
 
 //  A Spike Transfer Structure engine - transforms a given spike by
 //  performing a look up and delivering spikes
 class STS {
-    GNA *myGNA;
-    int stsID;
-    int numSpikes; // number of spikes yet to deliver
-    std::queue<SST::Interfaces::SimpleMem::Request *> incomingReqs;
+  GNA *myGNA;
+  int stsID;
+  int numSpikes; // number of spikes yet to deliver
+  std::queue<SST::Interfaces::SimpleMem::Request *> incomingReqs;
+
 public:
-    STS(GNA *parent, int n) : myGNA(parent), stsID(n), numSpikes(0) {;}
-    bool isFree();
-    void assign(int);
-    void advance(uint);
-    void returnRequest(SST::Interfaces::SimpleMem::Request *req) {
-        incomingReqs.push(req);
-    }
+  STS(GNA *parent, int n) : myGNA(parent), stsID(n), numSpikes(0) { ; }
+  bool isFree();
+  void assign(int);
+  void advance(uint);
+  void returnRequest(SST::Interfaces::SimpleMem::Request *req) {
+    incomingReqs.push(req);
+  }
 };
 
-}
-}
+} // namespace GNAComponent
+} // namespace SST
 
 #endif // _STS_H

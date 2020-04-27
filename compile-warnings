@@ -1,27 +1,27 @@
-In file included from /home/sabbir/sst-elements-org/GNA/sts.cc:17:
-/home/sabbir/sst-elements-org/GNA/sts.h:40:9: warning: private field 'stsID' is not used [-Wunused-private-field]
-    int stsID;
-        ^
+In file included from /home/sabbir/sst-elements-org/GNA/sts.cc:16:
+/home/sabbir/sst-elements-org/GNA/sts.h:40:7: warning: private field 'stsID' is not used [-Wunused-private-field]
+  int stsID;
+      ^
 1 warning generated.
-/home/sabbir/sst-elements-org/GNA/GNA.cc:122:36: warning: compound literals are a C99-specific feature [-Wc99-extensions]
-        neurons[nrn_num].configure((T_NctFl){float(trig),0.0,float(trig/10.)});
-                                   ^
-/home/sabbir/sst-elements-org/GNA/GNA.cc:216:20: warning: compound literals are a C99-specific feature [-Wc99-extensions]
-        bwpl[i]  = (Ctrl_And_Stat_Types::T_BwpFl){2001,targ,i*61};
-                   ^
-/home/sabbir/sst-elements-org/GNA/GNA.cc:95:22: warning: comparison of integers of different signs: 'int' and 'uint' (aka 'unsigned int') [-Wsign-compare]
-    for(int i = 0; i < STSParallelism; ++i) {
-                   ~ ^ ~~~~~~~~~~~~~~
-/home/sabbir/sst-elements-org/GNA/GNA.cc:120:31: warning: comparison of integers of different signs: 'int' and 'uint' (aka 'unsigned int') [-Wsign-compare]
-    for (int nrn_num=0;nrn_num<numNeurons;nrn_num++) {
-                       ~~~~~~~^~~~~~~~~~~
-/home/sabbir/sst-elements-org/GNA/GNA.cc:130:23: warning: comparison of integers of different signs: 'int' and 'uint' (aka 'unsigned int') [-Wsign-compare]
-    for (int n = 0; n < numNeurons; ++n) {
-                    ~ ^ ~~~~~~~~~~
-/home/sabbir/sst-elements-org/GNA/GNA.cc:146:26: warning: comparison of integers of different signs: 'int' and 'uint' (aka 'unsigned int') [-Wsign-compare]
-        for (int nn=0; nn<numCon; ++nn) {
-                       ~~^~~~~~~
-/home/sabbir/sst-elements-org/GNA/GNA.cc:242:16: warning: comparison of integers of different signs: 'int' and 'uint' (aka 'unsigned int') [-Wsign-compare]
-    if(targetN < numNeurons) {
-       ~~~~~~~ ^ ~~~~~~~~~~
+/home/sabbir/sst-elements-org/GNA/GNA.cc:124:32: warning: compound literals are a C99-specific feature [-Wc99-extensions]
+    neurons[nrn_num].configure((T_NctFl){float(trig), 0.0, float(trig / 10.)});
+                               ^
+/home/sabbir/sst-elements-org/GNA/GNA.cc:220:15: warning: compound literals are a C99-specific feature [-Wc99-extensions]
+    bwpl[i] = (Ctrl_And_Stat_Types::T_BwpFl){2001, targ, i * 61};
+              ^
+/home/sabbir/sst-elements-org/GNA/GNA.cc:97:21: warning: comparison of integers of different signs: 'int' and 'uint' (aka 'unsigned int') [-Wsign-compare]
+  for (int i = 0; i < STSParallelism; ++i) {
+                  ~ ^ ~~~~~~~~~~~~~~
+/home/sabbir/sst-elements-org/GNA/GNA.cc:122:33: warning: comparison of integers of different signs: 'int' and 'uint' (aka 'unsigned int') [-Wsign-compare]
+  for (int nrn_num = 0; nrn_num < numNeurons; nrn_num++) {
+                        ~~~~~~~ ^ ~~~~~~~~~~
+/home/sabbir/sst-elements-org/GNA/GNA.cc:132:21: warning: comparison of integers of different signs: 'int' and 'uint' (aka 'unsigned int') [-Wsign-compare]
+  for (int n = 0; n < numNeurons; ++n) {
+                  ~ ^ ~~~~~~~~~~
+/home/sabbir/sst-elements-org/GNA/GNA.cc:149:25: warning: comparison of integers of different signs: 'int' and 'uint' (aka 'unsigned int') [-Wsign-compare]
+    for (int nn = 0; nn < numCon; ++nn) {
+                     ~~ ^ ~~~~~~
+/home/sabbir/sst-elements-org/GNA/GNA.cc:248:15: warning: comparison of integers of different signs: 'int' and 'uint' (aka 'unsigned int') [-Wsign-compare]
+  if (targetN < numNeurons) {
+      ~~~~~~~ ^ ~~~~~~~~~~
 7 warnings generated.
