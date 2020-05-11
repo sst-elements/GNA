@@ -25,13 +25,11 @@ namespace GNAComponent {
 using namespace std;
 
 class neuron {
-public:
-    void configure(const Neuron_Loader_Types::T_NctFl &in) {
-        config = in;
-    }
+  public:
+    void configure(const Neuron_Loader_Types::T_NctFl &in) { config = in; }
     void deliverSpike(float str, uint when) {
         temporalBuffer[when] += str;
-        //printf(" got %f @ %d\n", str, when);
+        // printf(" got %f @ %d\n", str, when);
     }
     // performs Leaky Integrate and Fire. Returns true if fired.
     bool lif(const uint now) {
@@ -59,9 +57,10 @@ public:
         WMLAddr = addr;
         WMLLen = entries;
     }
-    uint32_t getWMLLen() const {return WMLLen;}
-    uint32_t getWMLAddr() const {return WMLAddr;}
-private:
+    uint32_t getWMLLen() const { return WMLLen; }
+    uint32_t getWMLAddr() const { return WMLAddr; }
+
+  private:
     Neuron_Loader_Types::T_NctFl config;
     float value;
     // temporal buffer
@@ -69,7 +68,7 @@ private:
     tBuf_t temporalBuffer;
     // Neuron's white matter list
     uint64_t WMLAddr; // start
-    uint32_t WMLLen; // number of entries in WML
+    uint32_t WMLLen;  // number of entries in WML
 
     // get any current spike values
     float getCurrentSpikes(const int now) {
@@ -77,7 +76,7 @@ private:
         if (i != temporalBuffer.end()) {
             float val = i->second;
             temporalBuffer.erase(i);
-            //printf(" got current spike %f @ %d\n", val, now);
+            // printf(" got current spike %f @ %d\n", val, now);
             return val;
         } else {
             return 0;
@@ -85,7 +84,7 @@ private:
     }
 };
 
-}
-}
+} // namespace GNAComponent
+} // namespace SST
 
 #endif // _NEURON_H

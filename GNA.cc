@@ -22,38 +22,36 @@
 #include <sst/elements/memHierarchy/memEvent.h>
 
 using namespace SST;
-//using namespace SST::MemHierarchy;
+// using namespace SST::MemHierarchy;
 using namespace SST::GNAComponent;
 
-GNA::GNA(ComponentId_t id, Params& params) :
-    Component(id), state(IDLE), now(0), numFirings(0), numDeliveries(0)
-{
+GNA::GNA(ComponentId_t id, Params &params) : Component(id), state(IDLE), now(0), numFirings(0), numDeliveries(0) {
     auto outputLevel = params.find<uint32_t>("verbose", 0);
     out.init("GNA:@p:@l: ", outputLevel, 0, Output::STDOUT);
 
     // get parameters
     numNeurons = params.find<int>("neurons", 32);
     if (numNeurons <= 0) {
-        out.fatal(CALL_INFO, -1,"number of neurons invalid\n");
+        out.fatal(CALL_INFO, -1, "number of neurons invalid\n");
     }
     BWPpTic = params.find<int>("BWPperTic", 2);
     if (BWPpTic <= 0) {
-        out.fatal(CALL_INFO, -1,"BWPperTic invalid\n");
+        out.fatal(CALL_INFO, -1, "BWPperTic invalid\n");
     }
     STSDispatch = params.find<int>("STSDispatch", 2);
     if (BWPpTic <= 0) {
-        out.fatal(CALL_INFO, -1,"STSDispatch invalid\n");
+        out.fatal(CALL_INFO, -1, "STSDispatch invalid\n");
     }
     STSParallelism = params.find<int>("STSParallelism", 2);
     if (BWPpTic <= 0) {
-        out.fatal(CALL_INFO, -1,"STSParallelism invalid\n");
+        out.fatal(CALL_INFO, -1, "STSParallelism invalid\n");
     }
     maxOutMem = params.find<int>("MaxOutMem", STSParallelism);
     if (BWPpTic <= 0) {
-        out.fatal(CALL_INFO, -1,"MaxOutMem invalid\n");
+        out.fatal(CALL_INFO, -1, "MaxOutMem invalid\n");
     }
 
-    //set our clock
+    // set our clock
     std::string clockFreq = params.find<std::string>("clock", "1GHz");
     clockHandler = new Clock::Handler<GNA>(this, &GNA::clockTic);
     clockTC = registerClock(clockFreq, clockHandler);
@@ -63,21 +61,21 @@ GNA::GNA(ComponentId_t id, Params& params) :
     primaryComponentDoNotEndSim();
 
     // init memory
-    memory = loadUserSubComponent<Interfaces::SimpleMem>("memory", ComponentInfo::SHARE_NONE, clockTC, new Interfaces::SimpleMem::Handler<GNA>(this, &GNA::handleEvent));
+    memory = loadUserSubComponent<Interfaces::SimpleMem>(
+        "memory", ComponentInfo::SHARE_NONE, clockTC, new Interfaces::SimpleMem::Handler<GNA>(this, &GNA::handleEvent));
     if (!memory) {
         params.insert("port", "mem_link");
-        memory = loadAnonymousSubComponent<Interfaces::SimpleMem>("memHierarchy.memInterface", "memory", 0,
-                ComponentInfo::SHARE_PORTS, params, clockTC, new Interfaces::SimpleMem::Handler<GNA>(this, &GNA::handleEvent));
+        memory = loadAnonymousSubComponent<Interfaces::SimpleMem>(
+            "memHierarchy.memInterface", "memory", 0, ComponentInfo::SHARE_PORTS, params, clockTC,
+            new Interfaces::SimpleMem::Handler<GNA>(this, &GNA::handleEvent));
     }
     if (!memory)
         out.fatal(CALL_INFO, -1, "Unable to load memHierarchy.memInterface subcomponent\n");
 }
 
-GNA::GNA() : Component(-1)
-{
-	// for serialization only
+GNA::GNA() : Component(-1) {
+    // for serialization only
 }
-
 
 void GNA::init(unsigned int phase) {
     using namespace Neuron_Loader_Types;
@@ -92,14 +90,14 @@ void GNA::init(unsigned int phase) {
     }
 
     // create STS units
-    for(int i = 0; i < STSParallelism; ++i) {
-        STSUnits.emplace_back(this,i);
+    for (int i = 0; i < STSParallelism; ++i) {
+        STSUnits.emplace_back(this, i);
     }
 
     // initialize neurons
     neurons = new neuron[numNeurons];
 
-    SST::RNG::MarsagliaRNG rng(1,13);
+    SST::RNG::MarsagliaRNG rng(1, 13);
 
     // <should read these in>
     // neurons
@@ -117,9 +115,9 @@ void GNA::init(unsigned int phase) {
     for (int nrn_num=24;nrn_num<=31;nrn_num++)
         neurons[nrn_num].configure((T_NctFl){1500,-2.0,0.0});
 #else
-    for (int nrn_num=0;nrn_num<numNeurons;nrn_num++) {
+    for (int nrn_num = 0; nrn_num < numNeurons; nrn_num++) {
         uint16_t trig = rng.generateNextUInt32() % 100 + 350;
-        neurons[nrn_num].configure((T_NctFl){float(trig),0.0,float(trig/10.)});
+        neurons[nrn_num].configure((T_NctFl){float(trig), 0.0, float(trig / 10.)});
     }
 #endif
 
@@ -135,15 +133,16 @@ void GNA::init(unsigned int phase) {
         bool local = true;
         if (roll == 0) {
             numCon = 15;
-            if (rng.generateNextUInt32() % 100) local = false;
+            if (rng.generateNextUInt32() % 100)
+                local = false;
         } else {
             numCon = 1 + (rng.generateNextUInt32() % 4);
             local = true;
         }
 
         countLinks += numCon;
-        neurons[n].setWML(startAddr,numCon);
-        for (int nn=0; nn<numCon; ++nn) {
+        neurons[n].setWML(startAddr, numCon);
+        for (int nn = 0; nn < numCon; ++nn) {
 
             uint16_t targ;
             if (local) {
@@ -154,32 +153,31 @@ void GNA::init(unsigned int phase) {
                 targ = n + diff;
             }
             if (targ == n) {
-                targ = n+1;
+                targ = n + 1;
             }
-            //targ %= numNeurons;
+            // targ %= numNeurons;
             if (targ >= numNeurons)
                 targ = 0;
 
-            uint64_t reqAddr = startAddr+nn*sizeof(T_Wme);
-            auto *req =
-                new SimpleMem::Request(SimpleMem::Request::Write, reqAddr,
-                                       sizeof(T_Wme));
+            uint64_t reqAddr = startAddr + nn * sizeof(T_Wme);
+            auto *req = new SimpleMem::Request(SimpleMem::Request::Write, reqAddr, sizeof(T_Wme));
             req->data.resize(sizeof(T_Wme));
-            uint32_t str = 300+(rng.generateNextUInt32() % 700);
-            if (targ == 0) str = 1;
+            uint32_t str = 300 + (rng.generateNextUInt32() % 700);
+            if (targ == 0)
+                str = 1;
             uint32_t tmpOff = 2 + (rng.generateNextUInt32() % 12);
             if (!local) {
                 tmpOff /= 2;
             }
-            req->data[0] = (str>>8) & 0xff; // Synaptic Str upper
-            req->data[1] = (str) & 0xff; // Synaptic Str lower
-            req->data[2] = (tmpOff>>8) & 0xff; // temp offset upper
-            req->data[3] = (tmpOff) & 0xff; // temp offset lower
-            req->data[4] = (targ>>8) & 0xff; // address upper
-            req->data[5] = (targ) & 0xff; // address lower
-            req->data[6] = 0; // valid
-            req->data[7] = 0; // valid
-            //printf("Writing n%d to targ%d at %p\n", n, targ, (void*)reqAddr);
+            req->data[0] = (str >> 8) & 0xff;    // Synaptic Str upper
+            req->data[1] = (str)&0xff;           // Synaptic Str lower
+            req->data[2] = (tmpOff >> 8) & 0xff; // temp offset upper
+            req->data[3] = (tmpOff)&0xff;        // temp offset lower
+            req->data[4] = (targ >> 8) & 0xff;   // address upper
+            req->data[5] = (targ)&0xff;          // address lower
+            req->data[6] = 0;                    // valid
+            req->data[7] = 0;                    // valid
+            // printf("Writing n%d to targ%d at %p\n", n, targ, (void*)reqAddr);
             memory->sendInitData(req);
         }
         assert(sizeof(T_Wme) == 8);
@@ -210,26 +208,25 @@ void GNA::init(unsigned int phase) {
     bwpl[15] = (Ctrl_And_Stat_Types::T_BwpFl){1,4,7};
 #else
     int bwpl_len = 2;
-    auto* bwpl = (Ctrl_And_Stat_Types::T_BwpFl*)calloc(bwpl_len,sizeof(Ctrl_And_Stat_Types::T_BwpFl));
+    auto *bwpl = (Ctrl_And_Stat_Types::T_BwpFl *)calloc(bwpl_len, sizeof(Ctrl_And_Stat_Types::T_BwpFl));
     for (int i = 0; i < bwpl_len; ++i) {
         int targ = rng.generateNextUInt32() % numNeurons;
-        bwpl[i]  = (Ctrl_And_Stat_Types::T_BwpFl){2001,targ,i*61};
+        bwpl[i] = (Ctrl_And_Stat_Types::T_BwpFl){2001, targ, i * 61};
     }
 #endif
     for (int i = 0; i < bwpl_len; ++i) {
-        BWPs.insert(std::pair<uint,Ctrl_And_Stat_Types::T_BwpFl>(bwpl[i].TmpSft, bwpl[i]));
+        BWPs.insert(std::pair<uint, Ctrl_And_Stat_Types::T_BwpFl>(bwpl[i].TmpSft, bwpl[i]));
     }
 }
 
 // handle incoming memory
-void GNA::handleEvent(Interfaces::SimpleMem::Request * req)
-{
+void GNA::handleEvent(Interfaces::SimpleMem::Request *req) {
     auto i = requests.find(req->id);
     if (i == requests.end()) {
-	out.fatal(CALL_INFO, -1, "Request ID (%" PRIx64 ") not found in outstanding requests!\n", req->id);
+        out.fatal(CALL_INFO, -1, "Request ID (%" PRIx64 ") not found in outstanding requests!\n", req->id);
     } else {
         // handle event
-        STS* requestor = i->second;
+        STS *requestor = i->second;
         requestor->returnRequest(req);
         // clean up
         requests.erase(i);
@@ -239,11 +236,11 @@ void GNA::handleEvent(Interfaces::SimpleMem::Request * req)
 void GNA::deliver(float val, int targetN, int time) {
     // AFR: should really throttle this in some way
     numDeliveries++;
-    if(targetN < numNeurons) {
+    if (targetN < numNeurons) {
         neurons[targetN].deliverSpike(val, time);
-        //printf("deliver %f to %d @ %d\n", val, targetN, time);
+        // printf("deliver %f to %d @ %d\n", val, targetN, time);
     } else {
-        out.fatal(CALL_INFO, -1,"Invalid Neuron Address\n");
+        out.fatal(CALL_INFO, -1, "Invalid Neuron Address\n");
     }
 }
 
@@ -277,14 +274,16 @@ void GNA::assignSTS() {
     int remainDispatches = STSDispatch;
 
     // try to find a free unit
-    for(auto &e: STSUnits) {
-        if (firedNeurons.empty()) return;
+    for (auto &e : STSUnits) {
+        if (firedNeurons.empty())
+            return;
         if (e.isFree()) {
             e.assign(firedNeurons.front());
             firedNeurons.pop_front();
             remainDispatches--;
         }
-        if (remainDispatches == 0) return;
+        if (remainDispatches == 0)
+            return;
     }
 }
 
@@ -302,7 +301,7 @@ void GNA::processFire() {
         assignSTS();
 
         // process neuron firings into activations
-        for(auto &e: STSUnits) {
+        for (auto &e : STSUnits) {
             e.advance(now);
             bool unitDone = e.isFree();
             allSpikesDelivered &= unitDone;
@@ -320,27 +319,25 @@ void GNA::lifAll() {
     for (uint n = 0; n < numNeurons; ++n) {
         bool fired = neurons[n].lif(now);
         if (fired) {
-            //printf(" %d fired\n", n);
+            // printf(" %d fired\n", n);
             firedNeurons.push_back(n);
         }
     }
 }
 
-bool GNA::clockTic( Cycle_t )
-{
+bool GNA::clockTic(Cycle_t) {
     // send some outgoing mem reqs
     int maxOut = maxOutMem;
-    //if((!outgoingReqs.empty()) && (now & 0x3f) == 0) {
+    // if((!outgoingReqs.empty()) && (now & 0x3f) == 0) {
     //    printf(" outRqst Q %d\n", outgoingReqs.size());
     //}
-    while(!outgoingReqs.empty() && maxOut > 0) {
+    while (!outgoingReqs.empty() && maxOut > 0) {
         memory->sendRequest(outgoingReqs.front());
         outgoingReqs.pop();
         maxOut--;
     }
 
-
-    switch(state) {
+    switch (state) {
     case IDLE:
         state = PROCESS_FIRE; // for now
         break;
@@ -359,11 +356,9 @@ bool GNA::clockTic( Cycle_t )
         }
         break;
     default:
-        out.fatal(CALL_INFO, -1,"Invalid GNA state\n");
+        out.fatal(CALL_INFO, -1, "Invalid GNA state\n");
     }
 
     // return false so we keep going
     return false;
 }
-
-

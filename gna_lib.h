@@ -38,24 +38,23 @@
 
 namespace Neuron_Loader_Types {
 
-  // Neuron Configuration Transmission (NCT) (Floating-Point Format)
-  using T_NctFl = struct {
+// Neuron Configuration Transmission (NCT) (Floating-Point Format)
+using T_NctFl = struct {
 
     float NrnThr; // Neuron Firing Potential
 
     float NrnMin; // Neuron Minimum Allowed Potential
 
     float NrnLkg; // Neuron Leakage Value
+};
 
-  };
-
-} // Neuron_Loader_Types
+} // namespace Neuron_Loader_Types
 
 namespace White_Matter_Types {
 
-  // White Matter Entry (WME) Format
-  // AFR: Changed to uint16
-  using T_Wme = struct {
+// White Matter Entry (WME) Format
+// AFR: Changed to uint16
+using T_Wme = struct {
 
     uint16_t SynStr; // Synaptic Strength
 
@@ -63,49 +62,44 @@ namespace White_Matter_Types {
 
     uint16_t SubAdr; // Sub-Address
 
-    uint16_t Valid;  // Valid Flag
+    uint16_t Valid; // Valid Flag
+};
 
-  };
-
-} // White_Matter_Types
+} // namespace White_Matter_Types
 
 namespace Ctx_Seq_Mem_Types {
 
-  // Context Sequence Entry (CSE) Format
-  using T_Cse = struct {
+// Context Sequence Entry (CSE) Format
+using T_Cse = struct {
 
-    int      CtxNum; // Context Number
+    int CtxNum; // Context Number
 
     uint32_t LifCnt; // LIF Count
+};
 
-  };
-
-} // Ctx_Seq_Mem_Types
+} // namespace Ctx_Seq_Mem_Types
 
 namespace Ctrl_And_Stat_Types {
 
-  // Brain Wave Pulse (BWP) Format (Floating-Point Format)
-  using T_BwpFl = struct {
+// Brain Wave Pulse (BWP) Format (Floating-Point Format)
+using T_BwpFl = struct {
 
     float InpValFl; // Input Value
 
-    int   InpNrn; // Input Neuron Number
+    int InpNrn; // Input Neuron Number
 
-    int   TmpSft; // Temporal Shift
+    int TmpSft; // Temporal Shift
+};
 
-  };
-
-  // Dump Tuple Format
-  using T_Dmp = struct {
+// Dump Tuple Format
+using T_Dmp = struct {
 
     int NrnNum; // Neuron Number
 
     int TmpIdx; // Temporal Index
+};
 
-  };
-
-} // Ctrl_And_Stat_Types
-
+} // namespace Ctrl_And_Stat_Types
 
 #endif // _GNA_LIB_H_
 
