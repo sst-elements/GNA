@@ -13,51 +13,53 @@
 // information, see the LICENSE file in the top level directory of the
 // distribution.
 
+#include <sst/core/sst_config.h>
 #include "sts.h"
 #include "GNA.h"
-#include <sst/core/sst_config.h>
 
 using namespace SST;
 using namespace SST::GNAComponent;
 
 void STS::assign(int neuronNum) {
-  const neuron *spiker = myGNA->getNeuron(neuronNum);
-  numSpikes = spiker->getWMLLen();
-  uint64_t listAddr = spiker->getWMLAddr();
+    const neuron *spiker = myGNA->getNeuron(neuronNum);
+    numSpikes = spiker->getWMLLen();
+    uint64_t listAddr = spiker->getWMLAddr();
 
-  // for each link, request the WML structure
-  for (int i = 0; i < numSpikes; ++i) {
-    // AFR: should throttle
-    using namespace Interfaces;
-    using namespace White_Matter_Types;
-    SimpleMem::Request *req = new SimpleMem::Request(SimpleMem::Request::Read,
-                                                     listAddr, sizeof(T_Wme));
-    myGNA->readMem(req, this);
-    listAddr += sizeof(T_Wme);
-  }
+    // for each link, request the WML structure
+    for (int i = 0; i < numSpikes; ++i) {
+        // AFR: should throttle
+        using namespace Interfaces;
+        using namespace White_Matter_Types;
+        auto *req =
+            new SimpleMem::Request(SimpleMem::Request::Read, listAddr, sizeof(T_Wme));
+        myGNA->readMem(req, this);
+        listAddr += sizeof(T_Wme);
+    }
 }
 
-bool STS::isFree() { return (numSpikes == 0); }
+bool STS::isFree() {
+    return (numSpikes == 0);
+}
 
 void STS::advance(uint now) {
-  // AFR: should throttle
-  while (incomingReqs.empty() == false) {
-    // get the request
-    SST::Interfaces::SimpleMem::Request *req = incomingReqs.front();
+    // AFR: should throttle
+    while (incomingReqs.empty() == false) {
+        // get the request
+        SST::Interfaces::SimpleMem::Request *req = incomingReqs.front();
 
-    assert(req->cmd == SST::Interfaces::SimpleMem::Request::ReadResp);
+        assert(req->cmd == SST::Interfaces::SimpleMem::Request::ReadResp);
 
-    // deliver the spike
-    auto &data = req->data;
-    uint16_t strength = (req->data[0] << 8) + req->data[1];
-    uint16_t tempOffset = (data[2] << 8) + data[3];
-    uint16_t target = (data[4] << 8) + data[5];
-    // printf("  gna deliver str%u to %u @ %u\n", strength, target,
-    // tempOffset+now);
-    myGNA->deliver(strength, target, tempOffset + now);
-    numSpikes--;
+        // deliver the spike
+        auto &data = req->data;
+        uint16_t strength = (req->data[0]<<8) + req->data[1];
+        uint16_t tempOffset = (data[2]<<8) + data[3];
+        uint16_t target = (data[4]<<8) + data[5];
+        //printf("  gna deliver str%u to %u @ %u\n", strength, target, tempOffset+now);
+        myGNA->deliver(strength, target, tempOffset+now);
+        numSpikes--;
 
-    incomingReqs.pop();
-    delete req;
-  }
+        incomingReqs.pop();
+        delete req;
+    }
 }
+
